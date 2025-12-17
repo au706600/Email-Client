@@ -1,4 +1,4 @@
-# Black-Mail
+# BlackMail
 
 An awesome tool for sending, responding and reading emails. 
 
@@ -9,13 +9,13 @@ An awesome tool for sending, responding and reading emails.
 - [✨ Features](#-features)
 - [🛠️ Tech Stack](#tech-stack)
 - [📦 Installation](#-installation)
-- [🧱 Directory Structure](#-directory-structure-of-black-mail)
+- [🧱 Directory Structure](#-directory-structure-of-blackmail)
 - [🎥 Demo](#-demo)
 - [📌 Future Work](#-future-work)
 
 ## 📘 Project Description
 ### Functional Requirements
-### Design/Architecture of Black-Mail
+### Design/Architecture of BlackMail
 
 
 ## 🧰 Prerequisites
@@ -35,7 +35,7 @@ An awesome tool for sending, responding and reading emails.
 
 
 
-## 🧱 Directory Structure of Black-Mail
+## 🧱 Directory Structure of BlackMail
 
 
 

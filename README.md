@@ -14,7 +14,8 @@ An awesome tool for sending, responding and reading emails.
 - [📌 Future Work](#-future-work)
 
 ## 📘 Project Description
-
+### Functional Requirements
+### Design/Architecture of Black-Mail
 
 
 ## 🧰 Prerequisites

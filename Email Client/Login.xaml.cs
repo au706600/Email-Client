@@ -47,13 +47,6 @@ namespace Email_Client
                 ClientSecret = config["Google:ClientSecret"]
             };
 
-            /*
-            var clientSecrets = new ClientSecrets
-            {
-                ClientId = "343035997092-nmbkrs8u6t0e88bq49jc2r6n77n3fe9l.apps.googleusercontent.com",
-                ClientSecret = "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"
-            };
-            */
 
             var credPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EmailClient", "GoogleOAuth");
 

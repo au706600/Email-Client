@@ -31,19 +31,24 @@ namespace Email_Client
     public partial class Window1 : Window
     {
         //private Login? loginWindow;
+        
+        // Pass credentials verification data as parameter to sending window
         private readonly UserCredential _credentials;
         public Window1(UserCredential credentials)
         {
             InitializeComponent();
             _credentials = credentials;
-        }
 
-        private void Window1_loaded(object sender, RoutedEventArgs e)
-        {
+            // Set placeholder text
             txtTopic.Text = "Write topic here";
             txtTopic.Foreground = Brushes.LightGray;
             txtText.Text = "Write text here";
             txtText.Foreground = Brushes.LightGray;
+        }
+
+        private void Window1_loaded(object sender, RoutedEventArgs e)
+        {
+            
         }
 
         private void txtTopic_GotFocus(object sender, RoutedEventArgs e)
@@ -86,27 +91,63 @@ namespace Email_Client
         async private void Button_Click(object sender, RoutedEventArgs e)
         {
 
+            // service initialization with credentials which uses the credentials object that was passed to the sending window constructor
             var service = new GmailService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = _credentials,
                 ApplicationName = "Email Client"
             });
 
+            // Accesstoken retrieval for user email
             var user = await service.Users.GetProfile("me").ExecuteAsync();
 
+            // User email address
             string emailUser = user.EmailAddress;
 
+            
             if(_credentials.Token.IsStale)
             {
                 await _credentials.RefreshTokenAsync(CancellationToken.None);
             }
 
+            // OAuth2 authentication mechanism for MailKit and for sending email
             var authorizationOAuth = new SaslMechanismOAuthBearer(emailUser, _credentials.Token.AccessToken);
 
+            // Create email message instance for email operation, in this case sending email through SMTP
             var message = new MimeMessage();
             message.From.Add(MailboxAddress.Parse(emailUser));
-            message.To.Add(MailboxAddress.Parse(txtTo.Text));
+
+            if (string.IsNullOrEmpty(txtTo.Text))
+            {
+                MessageBox.Show("Email recipient is required.");
+                return;
+            }
+
+            // Check that email is in valid format which is done through the IsValidEmail method (Implementation is shown below)
+            if (!IsValidEmail(txtTo.Text))
+            {
+                return;
+            }
+
+            // Read recipient email address from user
+            message.To.Add(new MailboxAddress("",txtTo.Text.ToString()));
+
+            // If email topic is empty, set default topic as "(Intet Emne)"
+            if (String.IsNullOrEmpty(txtTopic.Text) || txtTopic.Text == "Write topic here")
+            {
+                txtTopic.Text = "(Intet Emne)";
+            }
+
+            // Read email subject from user 
             message.Subject = txtTopic.Text;
+
+            // If email body is empty, set default body as empty string, meaning no content
+            if (String.IsNullOrEmpty(txtText.Text) || txtText.Text == "Write text here")
+            {
+                txtText.Text = "";
+            }
+
+            // Read email body from user
             message.Body = new TextPart("plain")
             {
                 Text = txtText.Text
@@ -121,16 +162,38 @@ namespace Email_Client
 
             */
 
+            // SmtpClient allows us for sending email through SMTP protocol so in this case, we create an instance of it, whereby
+            // we connect to Gmail's SMTP server, authenticate through OAuth2 and send the email message object asynchronously
             using (var client = new SmtpClient())
             {
                 await client.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
                 //client.AuthenticationMechanisms.Remove("XOAUTH2");
                 await client.AuthenticateAsync(authorizationOAuth);
                 await client.SendAsync(message);
+
                 await client.DisconnectAsync(true);
             }
 
             MessageBox.Show("Email Sent Successfully :)");
+        }
+
+        // This method checks that the email address entered by user is in valid format. The valid format is defined in RFC which is implicitly 
+        // internally implemented inside the TryParse method
+        private static bool IsValidEmail(string email)
+        {
+            if (!MailboxAddress.TryParse(email, out var address))
+            {
+                MessageBox.Show("Invalid email format. Please enter a valid email address.");
+                return false;
+            }
+
+            if (!address.Address.Contains('@'))
+            {
+                MessageBox.Show("Invalid email format. Please enter a valid email address.");
+                return false;
+            }
+
+            return true;
         }
     }
 }

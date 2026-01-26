@@ -14,7 +14,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Email_Client
 {
-    internal class EmailRepository
+    public class EmailRepository
     {
         private readonly IMemoryCache _cache;
         private const string cacheKey = "Cached_Emails";
@@ -33,9 +33,9 @@ namespace Email_Client
 
                 var command = connection.CreateCommand();
                 command.CommandText = @"CREATE TABLE IF NOT EXISTS Email (
-                    Id INTEGER PRIMARY KEY, 
-                    Topic TEXT,
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT, 
                     Sender TEXT,
+                    Topic TEXT,
                     Date TEXT
                     )";
 
@@ -61,7 +61,7 @@ namespace Email_Client
             var emails = new List<EmailData>();
 
             using var command = connection.CreateCommand();
-            command.CommandText = @"SELECT Id, Topic, Sender, Date FROM Email";
+            command.CommandText = @"SELECT Id, Sender, Topic, Date FROM Email";
             using var read = await command.ExecuteReaderAsync();
 
             while (await read.ReadAsync())
@@ -88,10 +88,10 @@ namespace Email_Client
 
             using var command = connection.CreateCommand(); 
 
-            command.CommandText = @"INSERT INTO Email(Topic, Sender, Date) VALUES (@topic, @sender, @date)";
-            command.Parameters.AddWithValue("@topic", email.Topic);
+            command.CommandText = @"INSERT INTO Email(Sender,Topic, Date) VALUES (@sender, @topic, @date)";
             command.Parameters.AddWithValue("@sender", email.Sender);
-            command.Parameters.AddWithValue("@Date", email.Date.ToString("o"));
+            command.Parameters.AddWithValue("@topic", email.Topic);
+            command.Parameters.AddWithValue("@date", email.Date.ToString("o"));
 
             await command.ExecuteNonQueryAsync();
 

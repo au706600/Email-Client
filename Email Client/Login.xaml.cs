@@ -29,6 +29,12 @@ namespace Email_Client
     /// </summary>
     public partial class Login : Window
     {
+        private readonly EmailService _emailservice;
+
+        public Login(EmailService emailservice)
+        {
+            _emailservice = emailservice;
+        }
         public Login()
         {
             InitializeComponent();
@@ -106,11 +112,24 @@ namespace Email_Client
                 await client.DisconnectAsync(true);
             }
 
+            /*
             // Navigate to sendWindow window
             if (authorizationOAuth != null)
             {
                 var sendWindow = new Window1(credentials);
                 sendWindow.Show();
+                this.Close();
+            }
+
+            */
+
+
+
+            // Navigate to mainWindow
+            if (authorizationOAuth != null)
+            {
+                var mainWindow = new MainWindow(credentials, _emailservice);
+                mainWindow.Show();
                 this.Close();
             }
 

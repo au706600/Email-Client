@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 
 namespace Email_Client
 {
-    internal class EmailData
+    public class EmailData
     {
         public int Id { get; set; }
-        public string Topic { get; set; }
         public string Sender { get; set; }
+        public string Topic { get; set; }
         public DateTime Date { get; set; }
 
-        public EmailData(int id, string topic, string sender, DateTime date)
+        public EmailData(int id, string sender, string topic, DateTime date)
         {
             Id = id;
-            Topic = topic;
             Sender = sender;
+            Topic = topic;
             Date = date;
         }
     }

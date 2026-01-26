@@ -87,7 +87,7 @@ namespace Email_Client
             }
         }
 
-        // https://stackoverflow.com/questions/62612997/how-to-get-email-after-using-google-oauth2-in-c
+    
         async private void Button_Click(object sender, RoutedEventArgs e)
         {
 

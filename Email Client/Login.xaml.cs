@@ -34,7 +34,6 @@ namespace Email_Client
             InitializeComponent();
         }
 
-        // https://github.com/jstedfast/MailKit/blob/master/GMailOAuth2.md
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             //const string GmailAccount = "";

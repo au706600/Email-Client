@@ -24,7 +24,6 @@ namespace Email_Client
     public partial class MainWindow : Window
     {
         private ObservableCollection<EmailData> emailEntries = new ObservableCollection<EmailData>();
-        private readonly UserCredential _credentials;
         private readonly EmailService _emailservice;
         public ObservableCollection<EmailData> EmailEntries
         {
@@ -32,12 +31,11 @@ namespace Email_Client
             set { emailEntries = value; }
         }
 
-        public MainWindow(UserCredential credentials, EmailService emailservice)
+        public MainWindow(EmailService emailservice)
         {
             InitializeComponent();
 
             _emailservice = emailservice;
-            _credentials = credentials;
             EmailEntries = new ObservableCollection<EmailData>();
             DataContext = this;
 
@@ -64,7 +62,7 @@ namespace Email_Client
 
             try
             {
-                var getEmails = await _emailservice.GetEmails();
+                var getEmails = await _emailservice.GetEmails(); 
                 EmailEntries.Clear();
                 foreach (var email in getEmails)
                 {

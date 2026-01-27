@@ -33,7 +33,8 @@ namespace Email_Client
 
                 var command = connection.CreateCommand();
                 command.CommandText = @"CREATE TABLE IF NOT EXISTS Email (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Uid INTEGER UNIQUE,
                     Sender TEXT,
                     Topic TEXT,
                     Date TEXT
@@ -61,12 +62,13 @@ namespace Email_Client
             var emails = new List<EmailData>();
 
             using var command = connection.CreateCommand();
-            command.CommandText = @"SELECT Id, Sender, Topic, Date FROM Email";
+            command.CommandText = @"SELECT Uid, Sender, Topic, Date FROM Email ORDER BY Date DESC";
             using var read = await command.ExecuteReaderAsync();
 
             while (await read.ReadAsync())
             {
-                emails.Add(new EmailData(read.GetInt32(0),
+                emails.Add(new EmailData(
+                read.GetInt32(0),
                 read.GetString(1),
                 read.GetString(2),
                 DateTime.Parse(read.GetString(3))
@@ -74,7 +76,7 @@ namespace Email_Client
             }
 
             // Cache the Emails
-            _cache.Set(cacheKey, emails, TimeSpan.FromMinutes(5));
+            _cache.Set(cacheKey, emails, TimeSpan.FromMinutes(2));
 
             return emails;
         }
@@ -86,9 +88,10 @@ namespace Email_Client
             using var connection = new SqliteConnection("Data Source = EmailData.db");
             await connection.OpenAsync();
 
-            using var command = connection.CreateCommand(); 
+            using var command = connection.CreateCommand();
 
-            command.CommandText = @"INSERT INTO Email(Sender,Topic, Date) VALUES (@sender, @topic, @date)";
+            command.CommandText = @"INSERT OR IGNORE INTO Email(Uid, Sender,Topic, Date) VALUES (@uid, @sender, @topic, @date)";
+            command.Parameters.AddWithValue("@uid", email.Uid);
             command.Parameters.AddWithValue("@sender", email.Sender);
             command.Parameters.AddWithValue("@topic", email.Topic);
             command.Parameters.AddWithValue("@date", email.Date.ToString("o"));
@@ -117,6 +120,24 @@ namespace Email_Client
         public void InvalidateCache()
         {
             _cache.Remove(cacheKey);
+        }
+
+        public async Task<DateTime?> GetLatestEmailsDate()
+        {
+            using var connection = new SqliteConnection("Data Source = EmailData.db");
+            await connection.OpenAsync();
+
+            using var command = connection.CreateCommand();
+            command.CommandText = @"SELECT MAX(Date) FROM Email";
+
+            var result = await command.ExecuteScalarAsync();
+
+            if (result == null || result == DBNull.Value)
+            {
+                return null;
+            }
+
+            return DateTime.Parse(result.ToString());
         }
     }
 }

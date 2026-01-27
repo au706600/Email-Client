@@ -15,6 +15,7 @@ using MailKit.Security;
 using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
 using System.Runtime.InteropServices;
+using Microsoft.Data.Sqlite;
 
 namespace Email_Client
 {
@@ -23,7 +24,7 @@ namespace Email_Client
         private readonly UserCredential _credentials;
         private readonly EmailRepository _repository;
         private readonly IMemoryCache _cache;
-        private readonly string cacheKey = "Cached_Emails";
+        //private readonly string cacheKey = "Cached_Emails";
 
         public EmailService(UserCredential credentials, EmailRepository repository, IMemoryCache cache)
         {
@@ -34,6 +35,7 @@ namespace Email_Client
 
         async public Task<List<EmailData>> GetEmails()
         {
+            /*
             // Check cache
             if (_cache.TryGetValue(cacheKey, out List<EmailData> cacheEmails))
             {
@@ -48,6 +50,7 @@ namespace Email_Client
                 _cache.Set(cacheKey, emailsDB, TimeSpan.FromMinutes(5));
                 return emailsDB;
             }
+            */
 
             // Load from Server
             var emailsServer = await RetrieveEmailsGmail();
@@ -57,9 +60,9 @@ namespace Email_Client
                 await _repository.AddEmails(emails);
             }
 
-            _cache.Set(cacheKey, emailsServer, TimeSpan.FromMinutes(5));
+            //_cache.Set(cacheKey, emailsServer, TimeSpan.FromMinutes(5));
 
-            return emailsServer;
+            return await _repository.GetEmails();
 
         }
 
@@ -80,30 +83,84 @@ namespace Email_Client
             }
 
             var authorizationOAuth = new SaslMechanismOAuthBearer(emailUser, _credentials.Token.AccessToken);
-            var emails = new List<EmailData>();
 
             // Server
             using var client = new ImapClient();
-            await client.ConnectAsync("imap.gmail.com", 993, SecureSocketOptions.StartTls);
+            client.Timeout=10000;
+            await client.ConnectAsync("imap.gmail.com", 993, SecureSocketOptions.SslOnConnect);
             await client.AuthenticateAsync(authorizationOAuth);
 
             var inbox = client.Inbox;
             await inbox.OpenAsync(FolderAccess.ReadOnly);
 
-            for(int i = 0; i < 100; i++)
+            var latestDate = await _repository.GetLatestEmailsDate();
+
+            /*
+            var searchQuery = latestDate.HasValue
+                ? SearchQuery.DeliveredAfter(latestDate.Value)
+                : SearchQuery.All;
+            */
+
+            var searchQuery = SearchQuery.All;
+            
+            var uids = await inbox.SearchAsync(searchQuery);
+
+            if(!uids.Any())
+            {
+                return new List<EmailData>();
+            }
+
+            var latestUids = uids
+                .OrderByDescending(u => u.Id)
+                .Take(50)
+                .ToList();
+
+            //var fetchCount = Math.Min(uids.Count, 10);
+
+            //var recentUids = uids.Skip(Math.Max(0, uids.Count - 10)).ToList();
+
+            var messages = await inbox.FetchAsync(latestUids, MessageSummaryItems.Envelope | MessageSummaryItems.InternalDate | MessageSummaryItems.UniqueId
+                );
+
+            var sortMessages = messages
+                .OrderByDescending(m => m.Date)
+                .Take(50)
+                .ToList();
+            var emails = new List<EmailData>();
+
+            foreach (var message in sortMessages)
+            {
+                emails.Add(new EmailData(
+                    (int)message.UniqueId.Id,
+                    message.Envelope.From.Mailboxes.FirstOrDefault()?.Name??("No Sender"),
+                    message.Envelope.Subject ?? "(No Subject)",
+                    message.Date.DateTime
+                    ));
+            }
+
+
+            /*
+
+            int inboxMessageCount = inbox.Recent;
+            int fetchCount = Math.Min(inboxMessageCount, 10);
+
+
+            for (int i = 0; i < fetchCount; i++)
             {
                 var message = await inbox.GetMessageAsync(i);
                 emails.Add(new EmailData(
                     i,
-                    message.From.Mailboxes.FirstOrDefault().Name,
-                    message.Subject,
+                    message.From.Mailboxes.FirstOrDefault()?.Name ?? ("No Sender"),
+                    message.Subject??("No Subject"),
                     message.Date.DateTime
                     ));
             }
+            */
 
             client.Disconnect(true);
 
             return emails;
         }
+
     }
 }

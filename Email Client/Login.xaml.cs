@@ -21,6 +21,7 @@ using System.IO;
 using Path = System.IO.Path;
 using Google.Apis.Util;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Email_Client
 {
@@ -123,12 +124,15 @@ namespace Email_Client
 
             */
 
-
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var repository = new EmailRepository(memoryCache);
+            await repository.InitializeDB();
+            var emailService = new EmailService(credentials, repository, memoryCache);
 
             // Navigate to mainWindow
             if (authorizationOAuth != null)
             {
-                var mainWindow = new MainWindow(credentials, _emailservice);
+                var mainWindow = new MainWindow(emailService);
                 mainWindow.Show();
                 this.Close();
             }

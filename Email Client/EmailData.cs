@@ -8,14 +8,14 @@ namespace Email_Client
 {
     public class EmailData
     {
-        public int Id { get; set; }
+        public int Uid { get; set; }
         public string Sender { get; set; }
         public string Topic { get; set; }
         public DateTime Date { get; set; }
 
-        public EmailData(int id, string sender, string topic, DateTime date)
+        public EmailData(int uid, string sender, string topic, DateTime date)
         {
-            Id = id;
+            Uid = uid;
             Sender = sender;
             Topic = topic;
             Date = date;

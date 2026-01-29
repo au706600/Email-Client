@@ -16,6 +16,7 @@ using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
 using System.Runtime.InteropServices;
 using Microsoft.Data.Sqlite;
+using System.Management;
 
 namespace Email_Client
 {
@@ -24,6 +25,9 @@ namespace Email_Client
         private readonly UserCredential _credentials;
         private readonly EmailRepository _repository;
         private readonly IMemoryCache _cache;
+        private string _emailUser;
+        private ImapClient _imapclient;
+        private readonly Dictionary<int, MimeMessage> _contentCache = new Dictionary<int, MimeMessage>();
         //private readonly string cacheKey = "Cached_Emails";
 
         public EmailService(UserCredential credentials, EmailRepository repository, IMemoryCache cache)
@@ -75,18 +79,18 @@ namespace Email_Client
             });
 
             var user = await service.Users.GetProfile("me").ExecuteAsync();
-            string emailUser = user.EmailAddress;
+            _emailUser = user.EmailAddress;
 
             if(_credentials.Token.IsStale)
             {
                 await _credentials.RefreshTokenAsync(CancellationToken.None);
             }
 
-            var authorizationOAuth = new SaslMechanismOAuthBearer(emailUser, _credentials.Token.AccessToken);
+            var authorizationOAuth = new SaslMechanismOAuthBearer(_emailUser, _credentials.Token.AccessToken);
 
             // Server
             using var client = new ImapClient();
-            client.Timeout=10000;
+            client.Timeout=5000;
             await client.ConnectAsync("imap.gmail.com", 993, SecureSocketOptions.SslOnConnect);
             await client.AuthenticateAsync(authorizationOAuth);
 
@@ -126,41 +130,69 @@ namespace Email_Client
                 .OrderByDescending(m => m.Date)
                 .Take(50)
                 .ToList();
+
             var emails = new List<EmailData>();
 
             foreach (var message in sortMessages)
             {
                 emails.Add(new EmailData(
-                    (int)message.UniqueId.Id,
+                    (int)message.UniqueId.Id, 
                     message.Envelope.From.Mailboxes.FirstOrDefault()?.Name??("No Sender"),
                     message.Envelope.Subject ?? "(No Subject)",
                     message.Date.DateTime
                     ));
             }
 
-
-            /*
-
-            int inboxMessageCount = inbox.Recent;
-            int fetchCount = Math.Min(inboxMessageCount, 10);
-
-
-            for (int i = 0; i < fetchCount; i++)
-            {
-                var message = await inbox.GetMessageAsync(i);
-                emails.Add(new EmailData(
-                    i,
-                    message.From.Mailboxes.FirstOrDefault()?.Name ?? ("No Sender"),
-                    message.Subject??("No Subject"),
-                    message.Date.DateTime
-                    ));
-            }
-            */
-
             client.Disconnect(true);
 
             return emails;
         }
 
+        async public Task<MimeMessage> getContent(int uid)
+        {
+            if (_contentCache.Count > 100)
+            {
+                _contentCache.Clear();
+            }
+
+            if (_contentCache.TryGetValue(uid, out var cached))
+            {
+                return cached;
+            }
+
+            await Connection();
+            var inboxMsg = await _imapclient.Inbox.GetMessageAsync(new UniqueId((uint)uid));
+            _contentCache[uid] = inboxMsg;
+            return inboxMsg;
+        }
+
+        async public Task Connection()
+        {
+            if (_imapclient != null && _imapclient.IsConnected)
+            {
+                return;
+            }
+
+            if(_imapclient != null && !_imapclient.IsConnected)
+            {
+                _imapclient?.Dispose();
+                _imapclient = null;
+                await Connection();
+            }
+
+
+            if (_credentials.Token.IsStale)
+            {
+                await _credentials.RefreshTokenAsync(CancellationToken.None);
+            }
+            var authorizationOAuth = new SaslMechanismOAuthBearer(_emailUser, _credentials.Token.AccessToken);
+
+            _imapclient = new ImapClient();
+            await _imapclient.ConnectAsync("imap.gmail.com", 993, SecureSocketOptions.SslOnConnect);
+            await _imapclient.AuthenticateAsync(authorizationOAuth);
+
+            var inbox = _imapclient.Inbox;
+            await inbox.OpenAsync(FolderAccess.ReadOnly);
+        }
     }
 }

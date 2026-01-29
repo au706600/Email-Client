@@ -25,10 +25,20 @@ namespace Email_Client
     {
         private ObservableCollection<EmailData> emailEntries = new ObservableCollection<EmailData>();
         private readonly EmailService _emailservice;
+        private EmailData selectedEmail;
         public ObservableCollection<EmailData> EmailEntries
         {
             get { return emailEntries; }
             set { emailEntries = value; }
+        }
+        public EmailData SelectedEmail
+        {
+            get { return selectedEmail; }
+            set
+            {
+                selectedEmail = value;
+                Select_Email(this, new RoutedEventArgs());
+            }
         }
 
         public MainWindow(EmailService emailservice)
@@ -37,24 +47,10 @@ namespace Email_Client
 
             _emailservice = emailservice;
             EmailEntries = new ObservableCollection<EmailData>();
+
             DataContext = this;
 
             Loaded += MainWindow_Load;
-            /*
-            EmailEntries.Add(new EmailData(
-                1,
-                "James",
-                "Testing",
-                DateTime.Now
-            ));
-
-            EmailEntries.Add(new EmailData(
-                2,
-                "Thor",
-                "Developing",
-                DateTime.Now
-                ));
-            */
         }
 
         async private void MainWindow_Load(object sender, RoutedEventArgs e)
@@ -74,6 +70,26 @@ namespace Email_Client
                 MessageBox.Show($"Failed to show emails: {ex.Message} ");
             }
            
+        }
+
+        private async Task Select_Email(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (selectedEmail != null)
+                {
+                    this.Cursor = Cursors.Wait;
+                    await _emailservice.getContent(selectedEmail.Uid);
+                    this.Cursor = Cursors.Arrow;
+                    var viewEmailContent = new ViewEmailContent(this, selectedEmail, _emailservice);
+                    viewEmailContent.Show();
+                    this.Hide();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to show content: {ex.Message} ");
+            }
         }
     }
 }

@@ -7,11 +7,27 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="600">
     <Grid>
-        <Border HorizontalAlignment="Center" VerticalAlignment="Stretch">
-            <ListView ItemsSource="{Binding EmailEntries}" Width="1000" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" SelectedItem="{Binding SelectedEmail}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border CornerRadius="7" Width="500" BorderThickness="2" Height="40" BorderBrush="Gray" Background="White" Margin="0,10,430,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="30"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" FontFamily="Segoe MDL2 Assets" Text="&#xE721;" VerticalAlignment="Center" Foreground="Gray" FontSize="14"></TextBlock>
+                <TextBox x:Name="searchBox" Grid.Column="1" GotFocus="searchBox_GotFocus" LostFocus="searchBox_LostFocus"  Width="450" Height="20" VerticalAlignment="Center" BorderThickness="0" Background="Transparent" FontSize="14"/>
+            </Grid>
+        </Border>
+        
+        <Border Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Stretch" BorderThickness="1" BorderBrush="WhiteSmoke" CornerRadius="7" Margin="0,0,30,15">
+            <ListView ItemsSource="{Binding EmailEntries}" BorderThickness="0" Margin="0,10,0,0" Width="1200" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.CanContentScroll="True" SelectedItem="{Binding SelectedEmail}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <Grid Margin="10">
+                        <Grid Margin="20">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="200"/>
                                 <ColumnDefinition Width="*"/>

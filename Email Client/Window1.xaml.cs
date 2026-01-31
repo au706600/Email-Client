@@ -55,7 +55,23 @@ namespace Email_Client
             if(!string.IsNullOrEmpty(contentEmail.HtmlBody))
             {
                 await HtmlViewer.EnsureCoreWebView2Async();
-                HtmlViewer.NavigateToString(contentEmail.HtmlBody);
+                //HtmlViewer.NavigateToString(contentEmail.HtmlBody);
+                HtmlViewer.NavigateToString($@" <!DOCTYPE html> 
+                          <html>
+                          <head>
+                          <style>
+                            body
+                            {{ 
+                              text-align: center;
+                            }}
+                          </style>
+                          </head>
+                          <body>
+                          {contentEmail.HtmlBody}
+                          </body>
+                          </html>
+                
+                ");
                 HtmlViewer.Visibility = Visibility.Visible;
                 TextViewer.Visibility = Visibility.Collapsed; 
             }
@@ -67,6 +83,12 @@ namespace Email_Client
                 TextViewer.Visibility = Visibility.Visible;
                 HtmlViewer.Visibility = Visibility.Collapsed;
             }
+        }
+
+        async private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            mainwindowCurrent.Show();
+            this.Hide();
         }
     }
 }

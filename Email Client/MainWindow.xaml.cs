@@ -15,6 +15,8 @@ using System.Windows.Shapes;
 using System.Collections;
 using System.Collections.ObjectModel;
 using Google.Apis.Auth.OAuth2;
+using Org.BouncyCastle.Tls;
+using Org.BouncyCastle.Asn1.BC;
 
 namespace Email_Client
 {
@@ -45,10 +47,13 @@ namespace Email_Client
         {
             InitializeComponent();
 
+            searchBox.Text = "Search in mails";
+            searchBox.Foreground = Brushes.LightGray;
+
             _emailservice = emailservice;
             EmailEntries = new ObservableCollection<EmailData>();
 
-            DataContext = this;
+            DataContext = this; 
 
             Loaded += MainWindow_Load;
         }
@@ -72,6 +77,24 @@ namespace Email_Client
            
         }
 
+        private void searchBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            if(searchBox.Text == "Search in mails")
+            {
+                searchBox.Text = "";
+                searchBox.Foreground = Brushes.Black;
+            }
+        }
+
+        private void searchBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if(string.IsNullOrWhiteSpace(searchBox.Text))
+            {
+                searchBox.Text = "Search in mails";
+                searchBox.Foreground = Brushes.Gray;
+            }
+        }
+
         private async Task Select_Email(object sender, RoutedEventArgs e)
         {
             try
@@ -91,5 +114,6 @@ namespace Email_Client
                 MessageBox.Show($"Failed to show content: {ex.Message} ");
             }
         }
+   
     }
 }

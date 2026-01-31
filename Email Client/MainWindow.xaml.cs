@@ -28,6 +28,7 @@ namespace Email_Client
         private ObservableCollection<EmailData> emailEntries = new ObservableCollection<EmailData>();
         private readonly EmailService _emailservice;
         private EmailData selectedEmail;
+        private readonly UserCredential _credentials;
         public ObservableCollection<EmailData> EmailEntries
         {
             get { return emailEntries; }
@@ -43,7 +44,7 @@ namespace Email_Client
             }
         }
 
-        public MainWindow(EmailService emailservice)
+        public MainWindow(EmailService emailservice, UserCredential credentials)
         {
             InitializeComponent();
 
@@ -52,6 +53,7 @@ namespace Email_Client
 
             _emailservice = emailservice;
             EmailEntries = new ObservableCollection<EmailData>();
+            _credentials = credentials;
 
             DataContext = this; 
 
@@ -114,6 +116,12 @@ namespace Email_Client
                 MessageBox.Show($"Failed to show content: {ex.Message} ");
             }
         }
-   
+
+        private void DrawCircleButton_Click(object sender, RoutedEventArgs e)
+        {
+            Window1 sendWindow = new Window1(_credentials);
+            sendWindow.Show();
+            this.Hide();
+        }
     }
 }

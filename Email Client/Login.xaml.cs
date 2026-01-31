@@ -132,7 +132,7 @@ namespace Email_Client
             // Navigate to mainWindow
             if (authorizationOAuth != null)
             {
-                var mainWindow = new MainWindow(emailService);
+                var mainWindow = new MainWindow(emailService, credentials);
                 mainWindow.Show();
                 this.Close();
             }

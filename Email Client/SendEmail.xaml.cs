@@ -22,6 +22,8 @@ using Google.Apis.Util;
 using MailKit.Security;
 using Google.Apis.Gmail.v1;
 using Google.Apis.Services;
+using Microsoft.Win32;
+using System.IO;
 
 namespace Email_Client
 {
@@ -34,16 +36,24 @@ namespace Email_Client
         
         // Pass credentials verification data as parameter to sending window
         private readonly UserCredential _credentials;
-        public Window1(UserCredential credentials)
+        private MainWindow mainwindow1;
+        private readonly string? _InReplyTo;
+        private readonly List<String>? _References;
+        private List<String> _files = new List<String>();
+        
+        public Window1(UserCredential credentials, MainWindow mainwindow, string? InReplyTo = null, List<String>? References  = null)
         {
             InitializeComponent();
             _credentials = credentials;
+            _InReplyTo = InReplyTo;
+            _References = References;
 
             // Set placeholder text
             txtTopic.Text = "Write topic here";
             txtTopic.Foreground = Brushes.LightGray;
             txtText.Text = "Write text here";
             txtText.Foreground = Brushes.LightGray;
+            mainwindow1 = mainwindow;
         }
 
         private void Window1_loaded(object sender, RoutedEventArgs e)
@@ -90,7 +100,6 @@ namespace Email_Client
     
         async private void Button_Click(object sender, RoutedEventArgs e)
         {
-
             // service initialization with credentials which uses the credentials object that was passed to the sending window constructor
             var service = new GmailService(new BaseClientService.Initializer()
             {
@@ -147,11 +156,35 @@ namespace Email_Client
                 txtText.Text = "";
             }
 
-            // Read email body from user
-            message.Body = new TextPart("plain")
+            // When replying, the messages we reply to should continue on same thread
+            if(!String.IsNullOrEmpty(_InReplyTo))
             {
-                Text = txtText.Text
-            };
+                message.InReplyTo = _InReplyTo;
+            }
+
+            
+             if (_References != null && !string.IsNullOrEmpty(message.MessageId))
+                {
+                    _References.Add(message.MessageId);
+                }
+            
+
+            // Attachments
+            var builder = new BodyBuilder();
+
+            // Read email body from user
+            builder.TextBody = txtText.Text;
+
+            // Check if we have any attachments
+            if (listFiles.Items.Count != 0)
+            {
+                foreach(var files in _files)
+                {
+                    builder.Attachments.Add(files);
+                }
+            }
+
+            message.Body = builder.ToMessageBody();
 
             /*
              |Protocol|Standard Port|SSL Port|
@@ -194,6 +227,28 @@ namespace Email_Client
             }
 
             return true;
+        }
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            mainwindow1.Show();
+            this.Hide();
+        }
+
+        private void Upload_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog uploadFile = new OpenFileDialog();
+            uploadFile.Filter = "Text files (*.pdf)|*.pdf";
+            uploadFile.Multiselect = true;
+            if (uploadFile.ShowDialog() == true)
+            {
+                foreach(var files in uploadFile.FileNames)
+                {
+                    _files.Add(files);
+                    listFiles.Items.Add(Path.GetFileName(files));
+                }
+                listFiles.Visibility = Visibility.Visible;
+            }
         }
     }
 }

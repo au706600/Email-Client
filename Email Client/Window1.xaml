@@ -14,7 +14,15 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Button Click="Back_Click" Height="40" Width="40" Background="Transparent" BorderThickness="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20">
+        <Button Click="Back_Click" 
+                Height="40" 
+                Width="40" 
+                Background="Transparent" 
+                BorderThickness="0" 
+                HorizontalAlignment="Left" 
+                VerticalAlignment="Top" 
+                Margin="20">
+            
             <Path 
                     Data="M 25,10 L 5,10 M 5,10 L 15,0 M 5,10 L 15,20" 
                     Stroke="Black"
@@ -24,10 +32,68 @@
         </Button>
 
         <Grid Grid.Row="1">
-            <wv2:WebView2 x:Name="HtmlViewer" Visibility="Collapsed"></wv2:WebView2>
-            <TextBox x:Name="TextViewer" IsReadOnly="True" TextWrapping="Wrap" Visibility="Collapsed" TextAlignment="Center" ></TextBox>
+            <wv2:WebView2 x:Name="HtmlViewer" 
+                          Visibility="Collapsed">
+            </wv2:WebView2>
+            <TextBox x:Name="TextViewer" 
+                     IsReadOnly="True" 
+                     TextWrapping="Wrap" 
+                     Visibility="Collapsed" 
+                     TextAlignment="Center" >
+                
+            </TextBox>
         </Grid>
 
+        <Button x:Name="Btn_Reply" 
+                Content="Reply"
+                Width="80"
+                Height="30"
+                HorizontalAlignment="Right"
+                Margin="0,0,200,0" 
+                Click="Btn_Reply_Click">
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Border CornerRadius="7" 
+                            Background="White" 
+                            BorderBrush="Gray" 
+                            BorderThickness="2" >
+                        <Grid>
+                            <TextBlock Grid.Column="0"/>
+                            <ContentPresenter Grid.Column="1"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
 
+        <Button x:Name="Btn_Forward" 
+                Content="Forward" 
+                Width="80" 
+                Height="30"
+                HorizontalAlignment="Right" 
+                Margin="0,0,70,0" 
+                Click="Btn_Forward_Click">
+            <Button.Template>
+                <ControlTemplate TargetType="Button">
+                    <Border CornerRadius="7" 
+                            Background="White" 
+                            BorderBrush="Gray" 
+                            BorderThickness="2" >
+                        <Grid>
+                            <TextBlock Grid.Column="0"/>
+                            <ContentPresenter Grid.Column="1"
+                                              Content="{TemplateBinding Content}"
+                                              ContentTemplate="{TemplateBinding ContentTemplate}"
+                                              HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
     </Grid>
 </Window>

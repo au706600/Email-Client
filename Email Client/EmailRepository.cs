@@ -37,7 +37,8 @@ namespace Email_Client
                     Uid INTEGER UNIQUE,
                     Sender TEXT,
                     Topic TEXT,
-                    Date TEXT
+                    Date TEXT,
+                    CHECK (Uid >= 0)
                     )";
 
                 await command.ExecuteNonQueryAsync();
@@ -48,13 +49,11 @@ namespace Email_Client
             }
         }
         
+        /*
         // Retrieve emails
         public async Task<List<EmailData>> GetEmails()
         {
-            if (_cache.TryGetValue(cacheKey, out List<EmailData> emailList))
-            {
-                return emailList;
-            }
+            
 
             using var connection = new SqliteConnection("Data Source = EmailData.db");
             await connection.OpenAsync();
@@ -68,7 +67,7 @@ namespace Email_Client
             while (await read.ReadAsync())
             {
                 emails.Add(new EmailData(
-                read.GetInt32(0),
+                Convert.ToUInt32(read.GetInt64(0)),
                 read.GetString(1),
                 read.GetString(2),
                 DateTime.Parse(read.GetString(3))
@@ -76,10 +75,12 @@ namespace Email_Client
             }
 
             // Cache the Emails
-            _cache.Set(cacheKey, emails, TimeSpan.FromMinutes(2));
+            //_cache.Set(cacheKey, emails, TimeSpan.FromMinutes(2));
 
             return emails;
         }
+        
+        */
 
         // Add Emails
 
@@ -122,22 +123,5 @@ namespace Email_Client
             _cache.Remove(cacheKey);
         }
 
-        public async Task<DateTime?> GetLatestEmailsDate()
-        {
-            using var connection = new SqliteConnection("Data Source = EmailData.db");
-            await connection.OpenAsync();
-
-            using var command = connection.CreateCommand();
-            command.CommandText = @"SELECT MAX(Date) FROM Email";
-
-            var result = await command.ExecuteScalarAsync();
-
-            if (result == null || result == DBNull.Value)
-            {
-                return null;
-            }
-
-            return DateTime.Parse(result.ToString());
-        }
     }
 }

@@ -40,8 +40,12 @@ namespace Email_Client
             set
             {
                 selectedEmail = value;
-                Select_Email(this, new RoutedEventArgs());
+                Select_EmailAsync(this, new RoutedEventArgs());
             }
+        }
+        private async void Select_EmailAsync(object sender, RoutedEventArgs e)
+        {
+            await Select_Email(sender, e);
         }
 
         public MainWindow(EmailService emailservice, UserCredential credentials)
@@ -74,7 +78,7 @@ namespace Email_Client
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to show emails: {ex.Message} ");
+                MessageBox.Show($"Failed to show emails: \n{ex} ");
             }
            
         }
@@ -103,10 +107,10 @@ namespace Email_Client
             {
                 if (selectedEmail != null)
                 {
-                    this.Cursor = Cursors.Wait;
-                    await _emailservice.getContent(selectedEmail.Uid);
-                    this.Cursor = Cursors.Arrow;
-                    var viewEmailContent = new ViewEmailContent(this, selectedEmail, _emailservice);
+                    //this.Cursor = Cursors.Wait;
+                    //await _emailservice.getContent(selectedEmail.Uid);
+                    //this.Cursor = Cursors.Arrow;
+                    var viewEmailContent = new ViewEmailContent(this, selectedEmail, _emailservice, _credentials);
                     viewEmailContent.Show();
                     this.Hide();
                 }
@@ -119,9 +123,12 @@ namespace Email_Client
 
         private void DrawCircleButton_Click(object sender, RoutedEventArgs e)
         {
-            Window1 sendWindow = new Window1(_credentials);
+            var sendWindow = new Window1(_credentials, this);
             sendWindow.Show();
-            this.Hide();
         }
+
+        // Refresh Logic
+        // https://daedtech.com/wpf-and-notifying-property-change/
+        
     }
 }

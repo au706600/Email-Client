@@ -27,8 +27,8 @@
                     Data="M 25,10 L 5,10 M 5,10 L 15,0 M 5,10 L 15,20" 
                     Stroke="Black"
                     StrokeThickness="2"
-                    Fill="Transparent"
-            />
+                    Fill="Transparent"/>
+            
         </Button>
 
         <Grid Grid.Row="1">
@@ -51,12 +51,13 @@
                 HorizontalAlignment="Right"
                 Margin="0,0,200,0" 
                 Click="Btn_Reply_Click">
+            
             <Button.Template>
                 <ControlTemplate TargetType="Button">
                     <Border CornerRadius="7" 
                             Background="White" 
                             BorderBrush="Gray" 
-                            BorderThickness="2" >
+                            BorderThickness="2">
                         <Grid>
                             <TextBlock Grid.Column="0"/>
                             <ContentPresenter Grid.Column="1"
@@ -77,6 +78,7 @@
                 HorizontalAlignment="Right" 
                 Margin="0,0,70,0" 
                 Click="Btn_Forward_Click">
+            
             <Button.Template>
                 <ControlTemplate TargetType="Button">
                     <Border CornerRadius="7" 

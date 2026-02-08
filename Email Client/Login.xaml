@@ -7,9 +7,27 @@
         mc:Ignorable="d"
         Title="Login" Height="450" Width="800">
     <Grid>
-        <Button Content="Sign up with Google" HorizontalAlignment="Center" Margin="0,234,0,0" VerticalAlignment="Top" Height="75" Width="263" FontSize="16" FontWeight="Bold" Click="Button_Click"/>
-        <Label Content="To continue, click on button below for signing up with Google" HorizontalAlignment="Center" Margin="0,112,0,0" VerticalAlignment="Top" Width="562" Height="66" FontSize="20"/>
-        <Label Content="Sign up with Google" HorizontalAlignment="Center" Margin="0,42,0,0" VerticalAlignment="Top" FontSize="22" FontWeight="Bold"/>
-
+        <Button Content="Sign up with Google" 
+                HorizontalAlignment="Center" 
+                Margin="0,234,0,0" 
+                VerticalAlignment="Top" 
+                Height="75" Width="263" 
+                FontSize="16" 
+                FontWeight="Bold" 
+                Click="Button_Click"/>
+        
+        <Label Content="To continue, click on button below for signing up with Google" 
+               HorizontalAlignment="Center" Margin="0,112,0,0" 
+               VerticalAlignment="Top" 
+               Width="562" 
+               Height="66" 
+               FontSize="20"/>
+        
+        <Label Content="Sign up with Google" 
+               HorizontalAlignment="Center" 
+               Margin="0,42,0,0" 
+               VerticalAlignment="Top" 
+               FontSize="22" 
+               FontWeight="Bold"/>
     </Grid>
 </Window>

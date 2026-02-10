@@ -17,23 +17,44 @@ using System.Collections.ObjectModel;
 using Google.Apis.Auth.OAuth2;
 using Org.BouncyCastle.Tls;
 using Org.BouncyCastle.Asn1.BC;
+using System.ComponentModel;
+using System.Printing;
 
 namespace Email_Client
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private ObservableCollection<EmailData> emailEntries = new ObservableCollection<EmailData>();
         private readonly EmailService _emailservice;
         private EmailData selectedEmail;
         private readonly UserCredential _credentials;
+        private ICollectionView emailCollectionView { get;  }
+        private string _emailFilterView = string.Empty;
+        private bool isPlaceHolder = true;
         public ObservableCollection<EmailData> EmailEntries
         {
             get { return emailEntries; }
             set { emailEntries = value; }
         }
+
+        public string CollectionEmails
+        {
+            get
+            {
+                return _emailFilterView;
+            }
+
+            set
+            {
+                _emailFilterView = value;
+                OnPropertyChanged(nameof(CollectionEmails));
+                emailCollectionView?.Refresh();
+            }
+        }
+        
         public EmailData SelectedEmail
         {
             get { return selectedEmail; }
@@ -52,14 +73,17 @@ namespace Email_Client
         {
             InitializeComponent();
 
-            searchBox.Text = "Search in mails";
-            searchBox.Foreground = Brushes.LightGray;
-
             _emailservice = emailservice;
             EmailEntries = new ObservableCollection<EmailData>();
             _credentials = credentials;
 
-            DataContext = this; 
+            emailCollectionView = CollectionViewSource.GetDefaultView(EmailEntries);
+            emailCollectionView.Filter = EmailFilter;
+            
+            DataContext = this;
+
+            searchBox.Text = "Search in mails";
+            searchBox.Foreground = Brushes.LightGray;
 
             Loaded += MainWindow_Load;
         }
@@ -85,11 +109,22 @@ namespace Email_Client
 
         private void searchBox_GotFocus(object sender, RoutedEventArgs e)
         {
+            /*
             if(searchBox.Text == "Search in mails")
             {
                 searchBox.Text = "";
                 searchBox.Foreground = Brushes.Black;
             }
+            */
+
+            if(isPlaceHolder)
+            {
+                searchBox.Text = "";
+                searchBox.Foreground = Brushes.Black;
+                isPlaceHolder = false;
+            }
+
+            
         }
 
         private void searchBox_LostFocus(object sender, RoutedEventArgs e)
@@ -98,6 +133,7 @@ namespace Email_Client
             {
                 searchBox.Text = "Search in mails";
                 searchBox.Foreground = Brushes.Gray;
+                isPlaceHolder = true;
             }
         }
 
@@ -127,8 +163,42 @@ namespace Email_Client
             sendWindow.Show();
         }
 
+        
+
+        // Search function (topic or sender)
+        private void searchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            //EmailEntries.Where(s => s.Sender.Contains(searchBox.Text) || s.Topic.Contains(searchBox.Text)).Select(s => s).ToList();
+            if (isPlaceHolder)
+            {
+                CollectionEmails = string.Empty;
+            }
+            else
+            {
+                CollectionEmails = searchBox.Text;
+            }
+
+        }
+
+        
+        private bool EmailFilter(object obj)
+        {
+            if(obj is EmailData emaildata)
+            {
+                return emaildata.Sender.Contains(CollectionEmails, StringComparison.InvariantCultureIgnoreCase) || emaildata.Topic.Contains(CollectionEmails, StringComparison.InvariantCultureIgnoreCase);
+            }
+
+            return false;
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        public void OnPropertyChanged(string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        
+
         // Refresh Logic
         // https://daedtech.com/wpf-and-notifying-property-change/
-        
     }
 }

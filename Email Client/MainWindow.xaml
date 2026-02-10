@@ -51,25 +51,28 @@
             
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="30"></ColumnDefinition>
+                    <ColumnDefinition Width="20"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" 
                            FontFamily="Segoe MDL2 Assets" 
-                           Text="&#xE721;" 
+                           Text="&#xE721;"
+                           HorizontalAlignment="Right"
                            VerticalAlignment="Center"
-                           Foreground="Gray" 
+                           Foreground="Gray"
                            FontSize="14"/>
-                
+
                 <TextBox x:Name="searchBox" 
                          Grid.Column="1" 
                          Width="450" 
                          GotFocus="searchBox_GotFocus" 
-                         LostFocus="searchBox_LostFocus" 
+                         LostFocus="searchBox_LostFocus"
+                         Text="{Binding CollectionEmails, UpdateSourceTrigger=PropertyChanged}"
                          VerticalAlignment="Center" 
                          BorderThickness="0" 
-                         Background="Transparent" 
-                         FontSize="14"/>
+                         Background="Transparent"
+                         FontSize="14" TextChanged="searchBox_TextChanged"/>
+              
             </Grid>
         </Border>
 
@@ -94,6 +97,7 @@
                     <TextBlock FontFamily="Segoe MDL2 Assets" 
                                Text="&#xE70F;" 
                                FontSize="14" 
+                               Foreground="Black"
                                Margin="0,0,6,0"/>
                     
                     <TextBlock Text="Write" 
